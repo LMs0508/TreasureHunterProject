@@ -1,0 +1,106 @@
+[
+	{
+		"file": "G:\\TreasureHunt\\Source\\TreasureHunt\\TreasureHunt.Build.cs",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\cl.exe",
+			"@G:\\TreasureHunt\\.vscode\\compileCommands_TreasureHunt\\TreasureHunt.1.rsp"
+		],
+		"directory": "G:\\UE_5.5\\Engine\\Source"
+	},
+	{
+		"file": "G:\\TreasureHunt\\Source\\TreasureHunt\\TreasureHunt.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\cl.exe",
+			"@G:\\TreasureHunt\\.vscode\\compileCommands_TreasureHunt\\TreasureHunt.1.rsp"
+		],
+		"directory": "G:\\UE_5.5\\Engine\\Source"
+	},
+	{
+		"file": "G:\\TreasureHunt\\Source\\TreasureHunt\\TreasureHunt.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\cl.exe",
+			"@G:\\TreasureHunt\\.vscode\\compileCommands_TreasureHunt\\TreasureHunt.1.rsp"
+		],
+		"directory": "G:\\UE_5.5\\Engine\\Source"
+	},
+	{
+		"file": "G:\\TreasureHunt\\Source\\TreasureHunt\\TreasureHuntCharacter.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\cl.exe",
+			"@G:\\TreasureHunt\\.vscode\\compileCommands_TreasureHunt\\TreasureHunt.1.rsp"
+		],
+		"directory": "G:\\UE_5.5\\Engine\\Source"
+	},
+	{
+		"file": "G:\\TreasureHunt\\Source\\TreasureHunt\\TreasureHuntCharacter.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\cl.exe",
+			"@G:\\TreasureHunt\\.vscode\\compileCommands_TreasureHunt\\TreasureHunt.1.rsp"
+		],
+		"directory": "G:\\UE_5.5\\Engine\\Source"
+	},
+	{
+		"file": "G:\\TreasureHunt\\Source\\TreasureHunt\\TreasureHuntGameMode.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\cl.exe",
+			"@G:\\TreasureHunt\\.vscode\\compileCommands_TreasureHunt\\TreasureHunt.1.rsp"
+		],
+		"directory": "G:\\UE_5.5\\Engine\\Source"
+	},
+	{
+		"file": "G:\\TreasureHunt\\Source\\TreasureHunt\\TreasureHuntGameMode.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\cl.exe",
+			"@G:\\TreasureHunt\\.vscode\\compileCommands_TreasureHunt\\TreasureHunt.1.rsp"
+		],
+		"directory": "G:\\UE_5.5\\Engine\\Source"
+	},
+	{
+		"file": "G:\\TreasureHunt\\Source\\TreasureHunt\\TreasureHuntPickUpComponent.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\cl.exe",
+			"@G:\\TreasureHunt\\.vscode\\compileCommands_TreasureHunt\\TreasureHunt.1.rsp"
+		],
+		"directory": "G:\\UE_5.5\\Engine\\Source"
+	},
+	{
+		"file": "G:\\TreasureHunt\\Source\\TreasureHunt\\TreasureHuntPickUpComponent.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\cl.exe",
+			"@G:\\TreasureHunt\\.vscode\\compileCommands_TreasureHunt\\TreasureHunt.1.rsp"
+		],
+		"directory": "G:\\UE_5.5\\Engine\\Source"
+	},
+	{
+		"file": "G:\\TreasureHunt\\Source\\TreasureHunt\\TreasureHuntProjectile.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\cl.exe",
+			"@G:\\TreasureHunt\\.vscode\\compileCommands_TreasureHunt\\TreasureHunt.1.rsp"
+		],
+		"directory": "G:\\UE_5.5\\Engine\\Source"
+	},
+	{
+		"file": "G:\\TreasureHunt\\Source\\TreasureHunt\\TreasureHuntProjectile.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\cl.exe",
+			"@G:\\TreasureHunt\\.vscode\\compileCommands_TreasureHunt\\TreasureHunt.1.rsp"
+		],
+		"directory": "G:\\UE_5.5\\Engine\\Source"
+	},
+	{
+		"file": "G:\\TreasureHunt\\Source\\TreasureHunt\\TreasureHuntWeaponComponent.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\cl.exe",
+			"@G:\\TreasureHunt\\.vscode\\compileCommands_TreasureHunt\\TreasureHunt.1.rsp"
+		],
+		"directory": "G:\\UE_5.5\\Engine\\Source"
+	},
+	{
+		"file": "G:\\TreasureHunt\\Source\\TreasureHunt\\TreasureHuntWeaponComponent.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.42.34433\\bin\\Hostx64\\x64\\cl.exe",
+			"@G:\\TreasureHunt\\.vscode\\compileCommands_TreasureHunt\\TreasureHunt.1.rsp"
+		],
+		"directory": "G:\\UE_5.5\\Engine\\Source"
+	}
+]
