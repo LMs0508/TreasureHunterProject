@@ -67,5 +67,26 @@ public:
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
+	// ===== 멀티플레이 테스트용 체력 시스템 =====
+public:
+	// 체력 (서버 → 모든 클라이언트로 자동 복제)
+	UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = "Stats")
+	float Health = 100.0f;
+
+	// F키 입력 시 호출 (클라이언트에서 실행)
+	UFUNCTION(BlueprintCallable, Category = "Stats")
+	void OnTestDamageInput();
+
+	// 서버에 데미지 처리 요청 (Server RPC)
+	UFUNCTION(Server, Reliable)
+	void Server_TakeTestDamage(float Amount);
+
+	// Health가 변경되면 모든 클라이언트에서 자동 호출됨
+	UFUNCTION()
+	void OnRep_Health();
+
+	// Replication 시스템에 어떤 변수를 복제할지 알려주는 함수
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 };
 

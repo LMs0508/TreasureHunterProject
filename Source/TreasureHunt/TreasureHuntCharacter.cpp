@@ -10,6 +10,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Engine/LocalPlayer.h"
+#include "Net/UnrealNetwork.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -99,4 +100,44 @@ void ATreasureHuntCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+// ===== 멀티플레이 테스트용 체력 시스템 구현 =====
+
+void ATreasureHuntCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// Health 변수를 모든 클라이언트에 복제하라고 등록
+	DOREPLIFETIME(ATreasureHuntCharacter, Health);
+}
+
+void ATreasureHuntCharacter::OnTestDamageInput()
+{
+	// 클라이언트에서 호출됨 → 서버에 요청만 보냄
+	UE_LOG(LogTemp, Warning, TEXT("[Client] F key pressed - requesting damage to server"));
+	Server_TakeTestDamage(10.0f);
+}
+
+void ATreasureHuntCharacter::Server_TakeTestDamage_Implementation(float Amount)
+{
+	// 이 함수는 무조건 서버에서만 실행됨 (Server RPC라서)
+	// 그래도 안전을 위해 권한 체크 한 번 더
+	if (!HasAuthority()) return;
+
+	Health = FMath::Max(0.0f, Health - Amount);
+
+	UE_LOG(LogTemp, Warning, TEXT("[Server] %s took %.1f damage. Health = %.1f"),
+		*GetName(), Amount, Health);
+
+	// Health 변수가 바뀌면 자동으로 모든 클라에게 복제되고
+	// 각 클라에서 OnRep_Health()가 호출됨
+}
+
+void ATreasureHuntCharacter::OnRep_Health()
+{
+	// 각 클라이언트에서 Health 변경을 감지했을 때 호출됨
+	// 나중에 여기서 UI 갱신, 피격 이펙트 등 처리
+	UE_LOG(LogTemp, Warning, TEXT("[Client OnRep] %s Health changed to %.1f"),
+		*GetName(), Health);
 }
