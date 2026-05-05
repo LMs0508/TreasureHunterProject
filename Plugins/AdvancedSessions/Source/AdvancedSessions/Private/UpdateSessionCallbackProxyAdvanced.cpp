@@ -12,7 +12,7 @@ UUpdateSessionCallbackProxyAdvanced::UUpdateSessionCallbackProxyAdvanced(const F
 {
 }	
 
-UUpdateSessionCallbackProxyAdvanced* UUpdateSessionCallbackProxyAdvanced::UpdateSession(UObject* WorldContextObject, const TArray<FSessionPropertyKeyPair> &ExtraSettings, int32 PublicConnections, int32 PrivateConnections, bool bUseLAN, bool bAllowInvites, bool bAllowJoinInProgress, bool bRefreshOnlineData, bool bIsDedicatedServer, bool bShouldAdvertise, bool bAllowJoinViaPresence, bool bAllowJoinViaPresenceFriendsOnly)
+UUpdateSessionCallbackProxyAdvanced* UUpdateSessionCallbackProxyAdvanced::UpdateSession(UObject* WorldContextObject, const TArray<FSessionPropertyKeyPair> &ExtraSettings, int32 PublicConnections, int32 PrivateConnections, bool bUseLAN, bool bAllowInvites, bool bAllowJoinInProgress, bool bRefreshOnlineData, bool bIsDedicatedServer, bool bShouldAdvertise)
 {
 	UUpdateSessionCallbackProxyAdvanced* Proxy = NewObject<UUpdateSessionCallbackProxyAdvanced>();
 	Proxy->NumPublicConnections = PublicConnections;
@@ -25,8 +25,6 @@ UUpdateSessionCallbackProxyAdvanced* UUpdateSessionCallbackProxyAdvanced::Update
 	Proxy->bAllowJoinInProgress = bAllowJoinInProgress;
 	Proxy->bDedicatedServer = bIsDedicatedServer;
 	Proxy->bShouldAdvertise = bShouldAdvertise;
-	Proxy->bAllowJoinViaPresence = bAllowJoinViaPresence;
-	Proxy->bAllowJoinViaPresenceFriendsOnly = bAllowJoinViaPresenceFriendsOnly;
 	return Proxy;	
 }
 
@@ -67,13 +65,10 @@ void UUpdateSessionCallbackProxyAdvanced::Activate()
 			Settings->bAllowJoinInProgress = bAllowJoinInProgress;
 			Settings->bIsLANMatch = bUseLAN;
 			//Settings->bUsesPresence = true;
+			//Settings->bAllowJoinViaPresence = true;
 			Settings->bAllowInvites = bAllowInvites;
 			Settings->bAllowJoinInProgress = bAllowJoinInProgress;
 			Settings->bIsDedicated = bDedicatedServer;
-
-			// Added in 5.6
-			Settings->bAllowJoinViaPresence = bAllowJoinViaPresence;
-			Settings->bAllowJoinViaPresenceFriendsOnly = bAllowJoinViaPresenceFriendsOnly;
 
 			FOnlineSessionSetting * fSetting = NULL;
 			FOnlineSessionSetting ExtraSetting;
