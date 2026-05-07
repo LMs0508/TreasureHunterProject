@@ -98,6 +98,17 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, BlueprintReadOnly, Category = "Stats", meta = (AllowPrivateAccess = "true"))
 	float Health = 100.0f;
 
+	// 사망 상태 (서버 → 클라 자동 복제)
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Stats")
+	bool bIsDead = false;
+
+	// 사망 시 모든 클라이언트에게 알리는 멀티캐스트 RPC
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_OnDeath();
+
+
+
+
 	// F키 입력 시 호출 (클라이언트에서 실행)
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	void OnTestDamageInput();
