@@ -95,7 +95,7 @@ public:
 	// ===== 멀티플레이 테스트용 체력 시스템 =====
 public:
 	// 체력 (서버 → 모든 클라이언트로 자동 복제)
-	UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = "Stats")
+	UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, BlueprintReadOnly, Category = "Stats", meta = (AllowPrivateAccess = "true"))
 	float Health = 100.0f;
 
 	// F키 입력 시 호출 (클라이언트에서 실행)
