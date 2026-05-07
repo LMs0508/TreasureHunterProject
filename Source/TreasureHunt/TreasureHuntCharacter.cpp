@@ -12,6 +12,7 @@
 #include "Engine/LocalPlayer.h"
 #include "Net/UnrealNetwork.h"
 #include "DrawDebugHelpers.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -147,6 +148,13 @@ void ATreasureHuntCharacter::Server_TryAttack_Implementation()
 
 			UE_LOG(LogTemp, Warning, TEXT("[Server] %s Health = %.1f"),
 				*HitCharacter->GetName(), HitCharacter->Health);
+
+			// 사망 체크
+			if (HitCharacter->Health <= 0.0f && !HitCharacter->bIsDead)
+			{
+				HitCharacter->bIsDead = true;
+				HitCharacter->Multicast_OnDeath();
+			}
 		}
 	}
 }
@@ -162,6 +170,7 @@ void ATreasureHuntCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 
 	// Health 변수를 모든 클라이언트에 복제하라고 등록
 	DOREPLIFETIME(ATreasureHuntCharacter, Health);
+	DOREPLIFETIME(ATreasureHuntCharacter, bIsDead);
 }
 
 void ATreasureHuntCharacter::OnTestDamageInput()
@@ -182,6 +191,11 @@ void ATreasureHuntCharacter::Server_TakeTestDamage_Implementation(float Amount)
 	UE_LOG(LogTemp, Warning, TEXT("[Server] %s took %.1f damage. Health = %.1f"),
 		*GetName(), Amount, Health);
 
+	if (Health <= 0.0f && !bIsDead)
+	{
+		bIsDead = true;
+		Multicast_OnDeath();
+	}
 	// Health 변수가 바뀌면 자동으로 모든 클라에게 복제되고
 	// 각 클라에서 OnRep_Health()가 호출됨
 }
@@ -192,4 +206,26 @@ void ATreasureHuntCharacter::OnRep_Health()
 	// 나중에 여기서 UI 갱신, 피격 이펙트 등 처리
 	UE_LOG(LogTemp, Warning, TEXT("[Client OnRep] %s Health changed to %.1f"),
 		*GetName(), Health);
+}
+
+
+// 사망시 효과
+void ATreasureHuntCharacter::Multicast_OnDeath_Implementation()
+{
+    UE_LOG(LogTemp, Warning, TEXT("[All] %s died"), *GetName());
+
+    // 입력 잠금 (자기 컨트롤러만)
+    if (APlayerController* PC = Cast<APlayerController>(GetController()))
+    {
+        DisableInput(PC);
+    }
+
+    // 콜리전 끄기 (다른 플레이어가 통과 가능, 시체 상태)
+    GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+    // 이동 정지
+    if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
+    {
+        MoveComp->DisableMovement();
+    }
 }
