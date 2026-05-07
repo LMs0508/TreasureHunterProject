@@ -11,6 +11,7 @@
 #include "InputActionValue.h"
 #include "Engine/LocalPlayer.h"
 #include "Net/UnrealNetwork.h"
+#include "DrawDebugHelpers.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -56,6 +57,7 @@ void ATreasureHuntCharacter::NotifyControllerChanged()
 
 void ATreasureHuntCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {	
+	
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
@@ -68,11 +70,15 @@ void ATreasureHuntCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ATreasureHuntCharacter::Look);
+
+		// Attacking
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &ATreasureHuntCharacter::OnAttackInput);
 	}
 	else
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
+	
 }
 
 
@@ -101,6 +107,52 @@ void ATreasureHuntCharacter::Look(const FInputActionValue& Value)
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
 }
+
+
+
+void ATreasureHuntCharacter::OnAttackInput()
+{
+	UE_LOG(LogTemp, Warning, TEXT("[Client] Attack input received"));
+	Server_TryAttack();
+}
+
+void ATreasureHuntCharacter::Server_TryAttack_Implementation()
+{
+	if (!HasAuthority()) return;
+
+	// 카메라 위치/방향 기준으로 트레이스
+	FVector Start = FirstPersonCameraComponent->GetComponentLocation();
+	FVector End = Start + (FirstPersonCameraComponent->GetForwardVector() * AttackRange);
+
+	FHitResult Hit;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);  // 자기 자신은 안 맞게
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		Hit, Start, End, ECC_Pawn, Params);
+
+	// 디버그용: 트레이스 라인 시각화 (1초간)
+	DrawDebugLine(GetWorld(), Start, End,
+		bHit ? FColor::Red : FColor::Green, false, 1.0f, 0, 1.0f);
+
+	if (bHit)
+	{
+		ATreasureHuntCharacter* HitCharacter = Cast<ATreasureHuntCharacter>(Hit.GetActor());
+		if (HitCharacter && HitCharacter != this)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[Server] %s attacked %s for %.1f damage"),
+				*GetName(), *HitCharacter->GetName(), AttackDamage);
+
+			HitCharacter->Health = FMath::Max(0.0f, HitCharacter->Health - AttackDamage);
+
+			UE_LOG(LogTemp, Warning, TEXT("[Server] %s Health = %.1f"),
+				*HitCharacter->GetName(), HitCharacter->Health);
+		}
+	}
+}
+
+
+
 
 // ===== 멀티플레이 테스트용 체력 시스템 구현 =====
 

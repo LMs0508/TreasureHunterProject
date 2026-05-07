@@ -44,6 +44,12 @@ class ATreasureHuntCharacter : public ACharacter
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
+
+	/** Attack Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* AttackAction;
+
+
 	
 public:
 	ATreasureHuntCharacter();
@@ -66,6 +72,25 @@ public:
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+
+
+public:
+	// 공격 입력 (클라이언트에서 실행, 서버에 요청 전송)
+	void OnAttackInput();
+
+	// 서버에서 트레이스 + 데미지 적용 (Server RPC)
+	UFUNCTION(Server, Reliable)
+	void Server_TryAttack();
+
+	// 공격 데미지 (직업별 보너스 붙일 자리)
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	float AttackDamage = 10.0f;
+
+	// 공격 사거리 (근접 무기 기준)
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	float AttackRange = 200.0f;
+
+
 
 	// ===== 멀티플레이 테스트용 체력 시스템 =====
 public:
