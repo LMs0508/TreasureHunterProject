@@ -57,6 +57,8 @@ void ATreasureHuntGameState::OnRep_Phase()
         PhaseTimeRemaining);
 
     // 다음 작업에서 라이팅/BGM 변경 이벤트 디스패처 호출 예정
+    OnPhaseChanged.Broadcast(CurrentPhase, CurrentRound);
+
 }
 
 void ATreasureHuntGameState::OnRep_Round()
