@@ -13,6 +13,7 @@
 #include "Net/UnrealNetwork.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "TreasureHuntGameState.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -21,6 +22,9 @@ DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 ATreasureHuntCharacter::ATreasureHuntCharacter()
 {
+	PrimaryActorTick.bCanEverTick = true;
+	GetCharacterMovement()->MaxWalkSpeed = 400.0f;
+
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
 		
@@ -74,6 +78,9 @@ void ATreasureHuntCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 
 		// Attacking
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &ATreasureHuntCharacter::OnAttackInput);
+
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ATreasureHuntCharacter::OnSprintStart);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ATreasureHuntCharacter::OnSprintStop);
 	}
 	else
 	{
@@ -120,6 +127,15 @@ void ATreasureHuntCharacter::OnAttackInput()
 void ATreasureHuntCharacter::Server_TryAttack_Implementation()
 {
 	if (!HasAuthority()) return;
+
+	if (ATreasureHuntGameState* GS = Cast<ATreasureHuntGameState>(GetWorld()->GetGameState()))
+	{
+		if (GS->CurrentPhase == EGamePhase::Day)
+		{
+			UE_LOG(LogTemp, Verbose, TEXT("Cannot attack during day phase"));
+			return;
+		}
+	}
 
 	// 카메라 위치/방향 기준으로 트레이스
 	FVector Start = FirstPersonCameraComponent->GetComponentLocation();
@@ -171,6 +187,8 @@ void ATreasureHuntCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 	// Health 변수를 모든 클라이언트에 복제하라고 등록
 	DOREPLIFETIME(ATreasureHuntCharacter, Health);
 	DOREPLIFETIME(ATreasureHuntCharacter, bIsDead);
+	DOREPLIFETIME(ATreasureHuntCharacter, Stamina);
+	DOREPLIFETIME(ATreasureHuntCharacter, bIsSprinting);
 }
 
 void ATreasureHuntCharacter::OnTestDamageInput()
@@ -228,4 +246,73 @@ void ATreasureHuntCharacter::Multicast_OnDeath_Implementation()
     {
         MoveComp->DisableMovement();
     }
+}
+
+// ===== 기력(Stamina) + 달리기 시스템 =====
+
+void ATreasureHuntCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	// 서버에서만 기력 계산 (결과는 Replicated로 클라에 자동 전달)
+	if (!HasAuthority()) return;
+
+	if (bIsSprinting)
+	{
+		// 달리는 중 → 기력 감소
+		Stamina = FMath::Max(0.0f, Stamina - StaminaDrainRate * DeltaSeconds);
+
+		// 기력이 0이 되면 강제로 달리기 중단
+		if (Stamina <= 0.0f)
+		{
+			Server_StopSprint();
+		}
+	}
+	else
+	{
+		// 걷거나 멈춤 → 기력 회복
+		Stamina = FMath::Min(MaxStamina, Stamina + StaminaRecoveryRate * DeltaSeconds);
+	}
+}
+
+void ATreasureHuntCharacter::OnSprintStart()
+{
+	// 클라이언트에서 Shift 눌렸을 때 서버에 요청
+	Server_StartSprint();
+}
+
+void ATreasureHuntCharacter::OnSprintStop()
+{
+	// 클라이언트에서 Shift 뗐을 때 서버에 요청
+	Server_StopSprint();
+}
+
+void ATreasureHuntCharacter::Server_StartSprint_Implementation()
+{
+	if (!HasAuthority()) return;
+
+	// 기력이 0이면 달리기 시작 못 함
+	if (Stamina <= 0.0f) return;
+
+	bIsSprinting = true;
+	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+
+	UE_LOG(LogTemp, Warning, TEXT("[Server] %s 달리기 시작. Stamina: %.1f"), *GetName(), Stamina);
+}
+
+void ATreasureHuntCharacter::Server_StopSprint_Implementation()
+{
+	if (!HasAuthority()) return;
+
+	bIsSprinting = false;
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+
+	UE_LOG(LogTemp, Warning, TEXT("[Server] %s 달리기 중단. Stamina: %.1f"), *GetName(), Stamina);
+}
+
+void ATreasureHuntCharacter::OnRep_Stamina()
+{
+	// Stamina가 바뀔 때 클라이언트에서 자동 호출
+	// 나중에 여기서 기력 UI 바 업데이트 할 거야
+	UE_LOG(LogTemp, Warning, TEXT("[Client OnRep] %s Stamina: %.1f"), *GetName(), Stamina);
 }
