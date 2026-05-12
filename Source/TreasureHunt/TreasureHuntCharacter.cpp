@@ -13,6 +13,7 @@
 #include "Net/UnrealNetwork.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "TreasureHuntGameState.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -126,6 +127,15 @@ void ATreasureHuntCharacter::OnAttackInput()
 void ATreasureHuntCharacter::Server_TryAttack_Implementation()
 {
 	if (!HasAuthority()) return;
+
+	if (ATreasureHuntGameState* GS = Cast<ATreasureHuntGameState>(GetWorld()->GetGameState()))
+	{
+		if (GS->CurrentPhase == EGamePhase::Day)
+		{
+			UE_LOG(LogTemp, Verbose, TEXT("Cannot attack during day phase"));
+			return;
+		}
+	}
 
 	// 카메라 위치/방향 기준으로 트레이스
 	FVector Start = FirstPersonCameraComponent->GetComponentLocation();
