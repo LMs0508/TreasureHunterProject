@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+ï»¿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -75,54 +75,110 @@ public:
 
 
 public:
-	// °ø°İ ÀÔ·Â (Å¬¶óÀÌ¾ğÆ®¿¡¼­ ½ÇÇà, ¼­¹ö¿¡ ¿äÃ» Àü¼Û)
+	// ê³µê²© ì…ë ¥ (í´ë¼ì´ì–¸íŠ¸ì—ì„œ ì‹¤í–‰, ì„œë²„ì— ìš”ì²­ ì „ì†¡)
 	void OnAttackInput();
 
-	// ¼­¹ö¿¡¼­ Æ®·¹ÀÌ½º + µ¥¹ÌÁö Àû¿ë (Server RPC)
+	// ì„œë²„ì—ì„œ íŠ¸ë ˆì´ìŠ¤ + ë°ë¯¸ì§€ ì ìš© (Server RPC)
 	UFUNCTION(Server, Reliable)
 	void Server_TryAttack();
 
-	// °ø°İ µ¥¹ÌÁö (Á÷¾÷º° º¸³Ê½º ºÙÀÏ ÀÚ¸®)
+	// ê³µê²© ë°ë¯¸ì§€ (ì§ì—…ë³„ ë³´ë„ˆìŠ¤ ë¶™ì¼ ìë¦¬)
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	float AttackDamage = 10.0f;
 
-	// °ø°İ »ç°Å¸® (±ÙÁ¢ ¹«±â ±âÁØ)
+	// ê³µê²© ì‚¬ê±°ë¦¬ (ê·¼ì ‘ ë¬´ê¸° ê¸°ì¤€)
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	float AttackRange = 200.0f;
 
 
 
-	// ===== ¸ÖÆ¼ÇÃ·¹ÀÌ Å×½ºÆ®¿ë Ã¼·Â ½Ã½ºÅÛ =====
+	// ===== ë©€í‹°í”Œë ˆì´ í…ŒìŠ¤íŠ¸ìš© ì²´ë ¥ ì‹œìŠ¤í…œ =====
 public:
-	// Ã¼·Â (¼­¹ö ¡æ ¸ğµç Å¬¶óÀÌ¾ğÆ®·Î ÀÚµ¿ º¹Á¦)
+	// ì²´ë ¥ (ì„œë²„ â†’ ëª¨ë“  í´ë¼ì´ì–¸íŠ¸ë¡œ ìë™ ë³µì œ)
 	UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, BlueprintReadOnly, Category = "Stats", meta = (AllowPrivateAccess = "true"))
 	float Health = 100.0f;
 
-	// »ç¸Á »óÅÂ (¼­¹ö ¡æ Å¬¶ó ÀÚµ¿ º¹Á¦)
+	// ì‚¬ë§ ìƒíƒœ (ì„œë²„ â†’ í´ë¼ ìë™ ë³µì œ)
 	UPROPERTY(Replicated, VisibleAnywhere, Category = "Stats")
 	bool bIsDead = false;
 
-	// »ç¸Á ½Ã ¸ğµç Å¬¶óÀÌ¾ğÆ®¿¡°Ô ¾Ë¸®´Â ¸ÖÆ¼Ä³½ºÆ® RPC
+	// ì‚¬ë§ ì‹œ ëª¨ë“  í´ë¼ì´ì–¸íŠ¸ì—ê²Œ ì•Œë¦¬ëŠ” ë©€í‹°ìºìŠ¤íŠ¸ RPC
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_OnDeath();
 
 
 
 
-	// FÅ° ÀÔ·Â ½Ã È£Ãâ (Å¬¶óÀÌ¾ğÆ®¿¡¼­ ½ÇÇà)
+	// Fí‚¤ ì…ë ¥ ì‹œ í˜¸ì¶œ (í´ë¼ì´ì–¸íŠ¸ì—ì„œ ì‹¤í–‰)
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	void OnTestDamageInput();
 
-	// ¼­¹ö¿¡ µ¥¹ÌÁö Ã³¸® ¿äÃ» (Server RPC)
+	// ì„œë²„ì— ë°ë¯¸ì§€ ì²˜ë¦¬ ìš”ì²­ (Server RPC)
 	UFUNCTION(Server, Reliable)
 	void Server_TakeTestDamage(float Amount);
 
-	// Health°¡ º¯°æµÇ¸é ¸ğµç Å¬¶óÀÌ¾ğÆ®¿¡¼­ ÀÚµ¿ È£ÃâµÊ
+	// Healthê°€ ë³€ê²½ë˜ë©´ ëª¨ë“  í´ë¼ì´ì–¸íŠ¸ì—ì„œ ìë™ í˜¸ì¶œë¨
 	UFUNCTION()
 	void OnRep_Health();
 
-	// Replication ½Ã½ºÅÛ¿¡ ¾î¶² º¯¼ö¸¦ º¹Á¦ÇÒÁö ¾Ë·ÁÁÖ´Â ÇÔ¼ö
+	// Replication ì‹œìŠ¤í…œì— ì–´ë–¤ ë³€ìˆ˜ë¥¼ ë³µì œí• ì§€ ì•Œë ¤ì£¼ëŠ” í•¨ìˆ˜
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	// ===== ê¸°ë ¥(Stamina) + ë‹¬ë¦¬ê¸° ì‹œìŠ¤í…œ =====
+public:
+	// í˜„ì¬ ê¸°ë ¥ â€” ì„œë²„ì—ì„œ ë°”ë€Œë©´ ëª¨ë“  í´ë¼ì´ì–¸íŠ¸ì— ìë™ ë³µì œë¨
+	UPROPERTY(ReplicatedUsing = OnRep_Stamina, VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	float Stamina = 100.0f;
+
+	// ê¸°ë ¥ ìµœëŒ€ì¹˜ â€” ì—ë””í„°ì—ì„œ ìˆ«ì ì¡°ì ˆ ê°€ëŠ¥
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats")
+	float MaxStamina = 100.0f;
+
+	// ë‹¬ë¦¬ëŠ” ë™ì•ˆ ì´ˆë‹¹ ê¸°ë ¥ ì†Œëª¨ëŸ‰ (ê¸°íšì„œ: -5/ì´ˆ)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats")
+	float StaminaDrainRate = 5.0f;
+
+	// ê±·ê±°ë‚˜ ë©ˆì¶œ ë•Œ ì´ˆë‹¹ ê¸°ë ¥ íšŒë³µëŸ‰
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats")
+	float StaminaRecoveryRate = 10.0f;
+
+	// ì§€ê¸ˆ ë‹¬ë¦¬ê³  ìˆëŠ”ì§€ ì—¬ë¶€ â€” ì„œë²„/í´ë¼ ë™ê¸°í™”
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	bool bIsSprinting = false;
+
+	// ë‹¬ë¦¬ê¸° ì´ë™ì†ë„
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats")
+	float SprintSpeed = 800.0f;
+
+	// ê±·ê¸° ì´ë™ì†ë„
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats")
+	float WalkSpeed = 400.0f;
+
+	// Staminaê°€ ë°”ë€” ë•Œ í´ë¼ì´ì–¸íŠ¸ì—ì„œ ìë™ í˜¸ì¶œ
+	UFUNCTION()
+	void OnRep_Stamina();
+
+	// í´ë¼ì´ì–¸íŠ¸ê°€ ì„œë²„ì— ë‹¬ë¦¬ê¸° ì‹œì‘ ìš”ì²­
+	UFUNCTION(Server, Reliable)
+	void Server_StartSprint();
+
+	// í´ë¼ì´ì–¸íŠ¸ê°€ ì„œë²„ì— ë‹¬ë¦¬ê¸° ì¤‘ë‹¨ ìš”ì²­
+	UFUNCTION(Server, Reliable)
+	void Server_StopSprint();
+
+	// ë§¤ í”„ë ˆì„ ê¸°ë ¥ ì¦ê° ì²˜ë¦¬
+	virtual void Tick(float DeltaSeconds) override;
+
+protected:
+	// Shift í‚¤ ëˆŒë €ì„ ë•Œ í˜¸ì¶œ
+	void OnSprintStart();
+
+	// Shift í‚¤ ë—ì„ ë•Œ í˜¸ì¶œ
+	void OnSprintStop();
+
+	// ì—ë””í„°ì—ì„œ Shift í‚¤ë‘ ì—°ê²°í•  Input Action
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* SprintAction;
 
 };
 
