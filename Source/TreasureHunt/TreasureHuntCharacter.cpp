@@ -314,7 +314,8 @@ void ATreasureHuntCharacter::Server_StopSprint_Implementation()
 
 void ATreasureHuntCharacter::OnRep_Stamina()
 {
-	// Stamina가 바뀔 때 클라이언트에서 자동 호출
-	// 나중에 여기서 기력 UI 바 업데이트 할 거야
-	UE_LOG(LogTemp, Warning, TEXT("[Client OnRep] %s Stamina: %.1f"), *GetName(), Stamina);
+	if (IsLocallyControlled())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[Client OnRep] %s Stamina: %.1f"), *GetName(), Stamina);
+	}
 }
