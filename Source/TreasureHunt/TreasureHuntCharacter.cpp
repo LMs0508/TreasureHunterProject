@@ -107,12 +107,19 @@ void ATreasureHuntCharacter::Move(const FInputActionValue& Value)
 
 void ATreasureHuntCharacter::Look(const FInputActionValue& Value)
 {
-	// input is a Vector2D
+	// UI ì—´ë ¤ìˆì„ ë•ŒëŠ” ìš°í´ë¦­ ì¤‘ì—ë§Œ ì¹´ë©”ë¼ íšŒì „ í—ˆìš©
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		if (PC->bShowMouseCursor && !PC->IsInputKeyDown(EKeys::RightMouseButton))
+		{
+			return;
+		}
+	}
+
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
 	if (Controller != nullptr)
 	{
-		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
@@ -122,6 +129,13 @@ void ATreasureHuntCharacter::Look(const FInputActionValue& Value)
 
 void ATreasureHuntCharacter::OnAttackInput()
 {
+	// UIï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[Client] bShowMouseCursor: %d"), PC->bShowMouseCursor);
+		if (PC->bShowMouseCursor) return; // ï¿½ï¿½ï¿½ì½º Ä¿ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì¸ï¿½ UI ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	}
+
 	UE_LOG(LogTemp, Warning, TEXT("[Client] Attack input received"));
 	Server_TryAttack();
 }
@@ -139,18 +153,18 @@ void ATreasureHuntCharacter::Server_TryAttack_Implementation()
 		}
 	}
 
-	// Ä«¸Ş¶ó À§Ä¡/¹æÇâ ±âÁØÀ¸·Î Æ®·¹ÀÌ½º
+	// Ä«ï¿½Ş¶ï¿½ ï¿½ï¿½Ä¡/ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Æ®ï¿½ï¿½ï¿½Ì½ï¿½
 	FVector Start = FirstPersonCameraComponent->GetComponentLocation();
 	FVector End = Start + (FirstPersonCameraComponent->GetForwardVector() * AttackRange);
 
 	FHitResult Hit;
 	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);  // ÀÚ±â ÀÚ½ÅÀº ¾È ¸Â°Ô
+	Params.AddIgnoredActor(this);  // ï¿½Ú±ï¿½ ï¿½Ú½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Â°ï¿½
 
 	bool bHit = GetWorld()->LineTraceSingleByChannel(
 		Hit, Start, End, ECC_Pawn, Params);
 
-	// µğ¹ö±×¿ë: Æ®·¹ÀÌ½º ¶óÀÎ ½Ã°¢È­ (1ÃÊ°£)
+	// ï¿½ï¿½ï¿½ï¿½×¿ï¿½: Æ®ï¿½ï¿½ï¿½Ì½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½È­ (1ï¿½Ê°ï¿½)
 	DrawDebugLine(GetWorld(), Start, End,
 		bHit ? FColor::Red : FColor::Green, false, 1.0f, 0, 1.0f);
 
@@ -167,7 +181,7 @@ void ATreasureHuntCharacter::Server_TryAttack_Implementation()
 			UE_LOG(LogTemp, Warning, TEXT("[Server] %s Health = %.1f"),
 				*HitCharacter->GetName(), HitCharacter->Health);
 
-			// »ç¸Á Ã¼Å©
+			// ï¿½ï¿½ï¿½ Ã¼Å©
 			if (HitCharacter->Health <= 0.0f && !HitCharacter->bIsDead)
 			{
 				HitCharacter->bIsDead = true;
@@ -180,13 +194,13 @@ void ATreasureHuntCharacter::Server_TryAttack_Implementation()
 
 
 
-// ===== ¸ÖÆ¼ÇÃ·¹ÀÌ Å×½ºÆ®¿ë Ã¼·Â ½Ã½ºÅÛ ±¸Çö =====
+// ===== ï¿½ï¿½Æ¼ï¿½Ã·ï¿½ï¿½ï¿½ ï¿½×½ï¿½Æ®ï¿½ï¿½ Ã¼ï¿½ï¿½ ï¿½Ã½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ =====
 
 void ATreasureHuntCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	// Health º¯¼ö¸¦ ¸ğµç Å¬¶óÀÌ¾ğÆ®¿¡ º¹Á¦ÇÏ¶ó°í µî·Ï
+	// Health ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ Å¬ï¿½ï¿½ï¿½Ì¾ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¶ï¿½ï¿½ ï¿½ï¿½ï¿½
 	DOREPLIFETIME(ATreasureHuntCharacter, Health);
 	DOREPLIFETIME(ATreasureHuntCharacter, bIsDead);
 	DOREPLIFETIME(ATreasureHuntCharacter, Stamina);
@@ -195,15 +209,15 @@ void ATreasureHuntCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 
 void ATreasureHuntCharacter::OnTestDamageInput()
 {
-	// Å¬¶óÀÌ¾ğÆ®¿¡¼­ È£ÃâµÊ ¡æ ¼­¹ö¿¡ ¿äÃ»¸¸ º¸³¿
+	// Å¬ï¿½ï¿½ï¿½Ì¾ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã»ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UE_LOG(LogTemp, Warning, TEXT("[Client] F key pressed - requesting damage to server"));
 	Server_TakeTestDamage(10.0f);
 }
 
 void ATreasureHuntCharacter::Server_TakeTestDamage_Implementation(float Amount)
 {
-	// ÀÌ ÇÔ¼ö´Â ¹«Á¶°Ç ¼­¹ö¿¡¼­¸¸ ½ÇÇàµÊ (Server RPC¶ó¼­)
-	// ±×·¡µµ ¾ÈÀüÀ» À§ÇØ ±ÇÇÑ Ã¼Å© ÇÑ ¹ø ´õ
+	// ï¿½ï¿½ ï¿½Ô¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ (Server RPCï¿½ï¿½)
+	// ï¿½×·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã¼Å© ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½
 	if (!HasAuthority()) return;
 
 	Health = FMath::Max(0.0f, Health - Amount);
@@ -216,55 +230,55 @@ void ATreasureHuntCharacter::Server_TakeTestDamage_Implementation(float Amount)
 		bIsDead = true;
 		Multicast_OnDeath();
 	}
-	// Health º¯¼ö°¡ ¹Ù²î¸é ÀÚµ¿À¸·Î ¸ğµç Å¬¶ó¿¡°Ô º¹Á¦µÇ°í
-	// °¢ Å¬¶ó¿¡¼­ OnRep_Health()°¡ È£ÃâµÊ
+	// Health ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ù²ï¿½ï¿½ ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ Å¬ï¿½ó¿¡°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½
+	// ï¿½ï¿½ Å¬ï¿½ó¿¡¼ï¿½ OnRep_Health()ï¿½ï¿½ È£ï¿½ï¿½ï¿½
 }
 
 void ATreasureHuntCharacter::OnRep_Health()
 {
-	// °¢ Å¬¶óÀÌ¾ğÆ®¿¡¼­ Health º¯°æÀ» °¨ÁöÇßÀ» ¶§ È£ÃâµÊ
-	// ³ªÁß¿¡ ¿©±â¼­ UI °»½Å, ÇÇ°İ ÀÌÆåÆ® µî Ã³¸®
+	// ï¿½ï¿½ Å¬ï¿½ï¿½ï¿½Ì¾ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ Health ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ È£ï¿½ï¿½ï¿½
+	// ï¿½ï¿½ï¿½ß¿ï¿½ ï¿½ï¿½ï¿½â¼­ UI ï¿½ï¿½ï¿½ï¿½, ï¿½Ç°ï¿½ ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ Ã³ï¿½ï¿½
 	UE_LOG(LogTemp, Warning, TEXT("[Client OnRep] %s Health changed to %.1f"),
 		*GetName(), Health);
 }
 
 
-// »ç¸Á½Ã È¿°ú
+// ï¿½ï¿½ï¿½ï¿½ï¿½ È¿ï¿½ï¿½
 void ATreasureHuntCharacter::Multicast_OnDeath_Implementation()
 {
     UE_LOG(LogTemp, Warning, TEXT("[All] %s died"), *GetName());
 
-    // ÀÔ·Â Àá±İ (ÀÚ±â ÄÁÆ®·Ñ·¯¸¸)
+    // ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½ (ï¿½Ú±ï¿½ ï¿½ï¿½Æ®ï¿½Ñ·ï¿½ï¿½ï¿½)
     if (APlayerController* PC = Cast<APlayerController>(GetController()))
     {
         DisableInput(PC);
     }
 
-    // Äİ¸®Àü ²ô±â (´Ù¸¥ ÇÃ·¹ÀÌ¾î°¡ Åë°ú °¡´É, ½ÃÃ¼ »óÅÂ)
+    // ï¿½İ¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½Ù¸ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾î°¡ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½)
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-    // ÀÌµ¿ Á¤Áö
+    // ï¿½Ìµï¿½ ï¿½ï¿½ï¿½ï¿½
     if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
     {
         MoveComp->DisableMovement();
     }
 }
 
-// ===== ±â·Â(Stamina) + ´Ş¸®±â ½Ã½ºÅÛ =====
+// ===== ï¿½ï¿½ï¿½(Stamina) + ï¿½Ş¸ï¿½ï¿½ï¿½ ï¿½Ã½ï¿½ï¿½ï¿½ =====
 
 void ATreasureHuntCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	// ¼­¹ö¿¡¼­¸¸ ±â·Â °è»ê (°á°ú´Â Replicated·Î Å¬¶ó¿¡ ÀÚµ¿ Àü´Ş)
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ Replicatedï¿½ï¿½ Å¬ï¿½ï¿½ ï¿½Úµï¿½ ï¿½ï¿½ï¿½ï¿½)
 	if (!HasAuthority()) return;
 
 	if (bIsSprinting)
 	{
-		// ´Ş¸®´Â Áß ¡æ ±â·Â °¨¼Ò
+		// ï¿½Ş¸ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		Stamina = FMath::Max(0.0f, Stamina - StaminaDrainRate * DeltaSeconds);
 
-		// ±â·ÂÀÌ 0ÀÌ µÇ¸é °­Á¦·Î ´Ş¸®±â Áß´Ü
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ 0ï¿½ï¿½ ï¿½Ç¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ş¸ï¿½ï¿½ï¿½ ï¿½ß´ï¿½
 		if (Stamina <= 0.0f)
 		{
 			Server_StopSprint();
@@ -272,20 +286,20 @@ void ATreasureHuntCharacter::Tick(float DeltaSeconds)
 	}
 	else
 	{
-		// °È°Å³ª ¸ØÃã ¡æ ±â·Â È¸º¹
+		// ï¿½È°Å³ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ È¸ï¿½ï¿½
 		Stamina = FMath::Min(MaxStamina, Stamina + StaminaRecoveryRate * DeltaSeconds);
 	}
 }
 
 void ATreasureHuntCharacter::OnSprintStart()
 {
-	// Å¬¶óÀÌ¾ğÆ®¿¡¼­ Shift ´­·ÈÀ» ¶§ ¼­¹ö¿¡ ¿äÃ»
+	// Å¬ï¿½ï¿½ï¿½Ì¾ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ Shift ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã»
 	Server_StartSprint();
 }
 
 void ATreasureHuntCharacter::OnSprintStop()
 {
-	// Å¬¶óÀÌ¾ğÆ®¿¡¼­ Shift ¶ÃÀ» ¶§ ¼­¹ö¿¡ ¿äÃ»
+	// Å¬ï¿½ï¿½ï¿½Ì¾ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ Shift ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã»
 	Server_StopSprint();
 }
 
@@ -293,13 +307,13 @@ void ATreasureHuntCharacter::Server_StartSprint_Implementation()
 {
 	if (!HasAuthority()) return;
 
-	// ±â·ÂÀÌ 0ÀÌ¸é ´Ş¸®±â ½ÃÀÛ ¸ø ÇÔ
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ 0ï¿½Ì¸ï¿½ ï¿½Ş¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½
 	if (Stamina <= 0.0f) return;
 
 	bIsSprinting = true;
 	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
 
-	UE_LOG(LogTemp, Warning, TEXT("[Server] %s ´Ş¸®±â ½ÃÀÛ. Stamina: %.1f"), *GetName(), Stamina);
+	UE_LOG(LogTemp, Warning, TEXT("[Server] %s ï¿½Ş¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½. Stamina: %.1f"), *GetName(), Stamina);
 }
 
 void ATreasureHuntCharacter::Server_StopSprint_Implementation()
@@ -309,7 +323,7 @@ void ATreasureHuntCharacter::Server_StopSprint_Implementation()
 	bIsSprinting = false;
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
-	UE_LOG(LogTemp, Warning, TEXT("[Server] %s ´Ş¸®±â Áß´Ü. Stamina: %.1f"), *GetName(), Stamina);
+	UE_LOG(LogTemp, Warning, TEXT("[Server] %s ï¿½Ş¸ï¿½ï¿½ï¿½ ï¿½ß´ï¿½. Stamina: %.1f"), *GetName(), Stamina);
 }
 
 void ATreasureHuntCharacter::OnRep_Stamina()
