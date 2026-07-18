@@ -18,6 +18,12 @@ struct FInventoryEntry
 
 	UPROPERTY(BlueprintReadOnly, Category = "Inventory")
 	int32 Count = 0;
+
+	// 이 아이템이 인벤토리에 담긴 후 지난 라운드 수
+	// 0 = 이번 라운드에 들어옴
+	// 라운드 종료 시 +1 됨
+	UPROPERTY(BlueprintReadOnly, Category = "Inventory")
+	int32 RoundsSinceCreated = 0;
 };
 
 // 인벤토리 변경 이벤트 (UI 갱신 등에 사용)
@@ -57,10 +63,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	bool Server_RemoveItem(int32 EntryIndex, int32 Count);
 
-	// 라운드 종료 시 호출. bSurvivesRoundEnd=false인 아이템들 제거.
-	// 기획서 §5.1
+	// 라운드 종료 시 호출.
+	// 모든 아이템의 RoundsSinceCreated를 +1하고,
+	// RoundsToExpire를 초과한 아이템 제거.
+	// RoundsToExpire = 0인 아이템(재료, 레시피)은 영구 유지.
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	void Server_ClearNonSurvivingItems();
+	void Server_UpdateItemExpiry();
 
 	// ===== 조회 함수들 (서버/클라 모두 호출 가능) =====
 

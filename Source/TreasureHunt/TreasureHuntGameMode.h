@@ -4,6 +4,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "RoundTimeData.h"
+#include "TreasureHuntGameState.h"
 #include "TreasureHuntGameMode.generated.h"
 
 UCLASS(minimalapi)
@@ -21,6 +22,11 @@ protected:
     URoundTimeData* RoundTimeData;
 
     FTimerHandle PhaseTimerHandle;
+
+    // GameState의 OnPhaseChanged 이벤트 핸들러
+    // 라운드 시작 시 모든 캐릭터의 인벤토리 만료 처리 호출
+    UFUNCTION()
+    void OnPhaseChangedHandler(EGamePhase NewPhase, int32 NewRound);
 
     UFUNCTION()
     void StartDayPhase();

@@ -53,9 +53,11 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Type")
     EItemType ItemType = EItemType::Material;
 
-    // 라운드 종료 시 유지되는가?
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Type")
-    bool bSurvivesRoundEnd = true;
+    // 몇 라운드 지나면 인벤토리에서 사라지는가?
+	// 0 = 영구 (재료, 레시피), N = N 라운드 후 사라짐 (포션, 음식, 함정, 무기)
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Type", meta = (ClampMin = "0"))
+    int32 RoundsToExpire = 0;
+
 
     // 도적이 강탈 가능한가?
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Type")
