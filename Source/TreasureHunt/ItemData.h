@@ -43,6 +43,16 @@ public:
         meta = (ClampMin = "1", ClampMax = "10"))
     int32 SlotsRequired = 1;
 
+    // 그리드에서 차지하는 모양 (기획서 v1.2: 5x4 그리드)
+        // 예: 포션 1x1, 단검 2x1, 칼 3x1, 방호벽 3x2
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Inventory",
+        meta = (ClampMin = "1", ClampMax = "5"))
+    int32 GridWidth = 1;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Inventory",
+        meta = (ClampMin = "1", ClampMax = "4"))
+    int32 GridHeight = 1;
+
     // 한 슬롯에 최대 몇 개 쌓을 수 있는지 (스택 가능 여부)
     // 1이면 스택 불가 (무기 등), 99 같으면 스택 가능 (포션, 재료)
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Inventory",

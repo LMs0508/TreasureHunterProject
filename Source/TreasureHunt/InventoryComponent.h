@@ -18,6 +18,14 @@ struct FInventoryEntry
 
 	UPROPERTY(BlueprintReadOnly, Category = "Inventory")
 	int32 Count = 0;
+
+	// 그리드 좌상단 위치 (기획서 v1.2: 5x4 그리드, 0부터 시작)
+	// GridX: 0~4 (열), GridY: 0~3 (행)
+	UPROPERTY(BlueprintReadOnly, Category = "Inventory")
+	int32 GridX = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Inventory")
+	int32 GridY = 0;
 };
 
 // 인벤토리 변경 이벤트 (UI 갱신 등에 사용)
@@ -37,6 +45,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory",
 		meta = (ClampMin = "1", ClampMax = "30"))
 	int32 MaxSlots = 10;
+
+	// ===== 그리드 설정 (기획서 v1.2: 5x4 = 20칸) =====
+	static constexpr int32 GridColumns = 5;
+	static constexpr int32 GridRows = 4;
 
 	// 인벤토리 내용 (Replicated, 모든 클라가 봄)
 	UPROPERTY(ReplicatedUsing = OnRep_Items, BlueprintReadOnly, Category = "Inventory")
