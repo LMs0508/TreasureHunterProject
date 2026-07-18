@@ -86,19 +86,35 @@ bool UInventoryComponent::Server_RemoveItem(int32 EntryIndex, int32 Count)
     return true;
 }
 
-void UInventoryComponent::Server_ClearNonSurvivingItems()
+void UInventoryComponent::Server_UpdateItemExpiry()
 {
     if (!GetOwner() || !GetOwner()->HasAuthority())
     {
         return;
     }
 
-    // bSurvivesRoundEnd가 false인 아이템 제거 (역순 순회로 안전하게)
     bool bChanged = false;
+
+    // 역순 순회로 안전하게 제거
     for (int32 i = Items.Num() - 1; i >= 0; --i)
     {
-        if (Items[i].Item && !Items[i].Item->bSurvivesRoundEnd)
+        if (!Items[i].Item)
         {
+            continue;
+        }
+
+        // 카운터 증가
+        Items[i].RoundsSinceCreated++;
+
+        // RoundsToExpire가 0이면 영구 (재료, 레시피)
+        // 0이 아니고 카운터가 초과했으면 제거
+        const int32 Limit = Items[i].Item->RoundsToExpire;
+        if (Limit > 0 && Items[i].RoundsSinceCreated >= Limit)
+        {
+            UE_LOG(LogTemp, Log, TEXT("[Inventory] Item %s expired (rounds: %d/%d)"),
+                *Items[i].Item->DisplayName.ToString(),
+                Items[i].RoundsSinceCreated,
+                Limit);
             Items.RemoveAt(i);
             bChanged = true;
         }

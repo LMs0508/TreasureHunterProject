@@ -5,6 +5,10 @@
 #include "TreasureHuntGameState.h"
 #include "TimerManager.h"
 #include "UObject/ConstructorHelpers.h"
+#include "InventoryComponent.h"
+#include "GameFramework/Character.h"
+#include "Kismet/GameplayStatics.h"
+
 
 ATreasureHuntGameMode::ATreasureHuntGameMode()
     : Super()
@@ -37,6 +41,12 @@ void ATreasureHuntGameMode::BeginPlay()
     }
 
     StartDayPhase();
+
+    ATreasureHuntGameState* GS = Cast<ATreasureHuntGameState>(GameState);
+    if (GS)
+    {
+        GS->OnPhaseChanged.AddDynamic(this, &ATreasureHuntGameMode::OnPhaseChangedHandler);
+    }
 }
 
 void ATreasureHuntGameMode::StartDayPhase()
@@ -100,4 +110,27 @@ void ATreasureHuntGameMode::OnNightPhaseEnd()
     }
 
     StartDayPhase();
+}
+
+void ATreasureHuntGameMode::OnPhaseChangedHandler(EGamePhase NewPhase, int32 NewRound)
+{
+    // Day로 전환된 시점에 인벤토리 만료 처리
+    // 단, 첫 번째 라운드의 첫 Day는 제외 (아직 정리할 게 없음)
+    if (NewPhase == EGamePhase::Day && NewRound > 1)
+    {
+        UE_LOG(LogTemp, Log, TEXT("[GameMode] Round %d 시작. 인벤토리 만료 처리 중..."), NewRound);
+
+        // 모든 캐릭터 찾기
+        TArray<AActor*> AllCharacters;
+        UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACharacter::StaticClass(), AllCharacters);
+
+        // 각 캐릭터의 InventoryComponent에 만료 처리 호출
+        for (AActor* Actor : AllCharacters)
+        {
+            if (UInventoryComponent* InvComp = Actor->FindComponentByClass<UInventoryComponent>())
+            {
+                InvComp->Server_UpdateItemExpiry();
+            }
+        }
+    }
 }
