@@ -1,5 +1,4 @@
 #pragma once
-
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "ItemData.generated.h"
@@ -20,7 +19,6 @@ UCLASS(BlueprintType)
 class TREASUREHUNT_API UItemData : public UDataAsset
 {
     GENERATED_BODY()
-
 public:
     // 아이템 고유 ID
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Identity")
@@ -44,7 +42,7 @@ public:
     int32 SlotsRequired = 1;
 
     // 그리드에서 차지하는 모양 (기획서 v1.2: 5x4 그리드)
-        // 예: 포션 1x1, 단검 2x1, 칼 3x1, 방호벽 3x2
+    // 예: 포션 1x1, 단검 2x1, 칼 3x1, 방호벽 3x2
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Inventory",
         meta = (ClampMin = "1", ClampMax = "5"))
     int32 GridWidth = 1;
@@ -63,9 +61,10 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Type")
     EItemType ItemType = EItemType::Material;
 
-    // 라운드 종료 시 유지되는가?
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Type")
-    bool bSurvivesRoundEnd = true;
+    // 몇 라운드 지나면 인벤토리에서 사라지는가?
+    // 0 = 영구 (재료, 레시피), N = N 라운드 후 사라짐 (포션, 음식, 함정, 무기)
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Type", meta = (ClampMin = "0"))
+    int32 RoundsToExpire = 0;
 
     // 도적이 강탈 가능한가?
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Type")
