@@ -1,8 +1,10 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+ï»¿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "TreasureHuntGameMode.h"
 #include "TreasureHuntCharacter.h"
 #include "TreasureHuntGameState.h"
+#include "StatueActor.h"
+#include "StatueSpawnPoint.h"
 #include "TimerManager.h"
 #include "UObject/ConstructorHelpers.h"
 #include "InventoryComponent.h"
@@ -39,6 +41,8 @@ void ATreasureHuntGameMode::BeginPlay()
         UE_LOG(LogTemp, Error, TEXT("[GameMode] DA_RoundTimes is empty"));
         return;
     }
+	// ì„ìƒ ìŠ¤í°
+    SpawnStatues();
 
     StartDayPhase();
 
@@ -114,17 +118,17 @@ void ATreasureHuntGameMode::OnNightPhaseEnd()
 
 void ATreasureHuntGameMode::OnPhaseChangedHandler(EGamePhase NewPhase, int32 NewRound)
 {
-    // Day·Î ÀüÈ¯µÈ ½ÃÁ¡¿¡ ÀÎº¥Åä¸® ¸¸·á Ã³¸®
-    // ´Ü, Ã¹ ¹øÂ° ¶ó¿îµåÀÇ Ã¹ Day´Â Á¦¿Ü (¾ÆÁ÷ Á¤¸®ÇÒ °Ô ¾øÀ½)
+    // Dayë¡œ ì „í™˜ëœ ì‹œì ì— ì¸ë²¤í† ë¦¬ ë§Œë£Œ ì²˜ë¦¬
+    // ë‹¨, ì²« ë²ˆì§¸ ë¼ìš´ë“œì˜ ì²« DayëŠ” ì œì™¸ (ì•„ì§ ì •ë¦¬í•  ê²Œ ì—†ìŒ)
     if (NewPhase == EGamePhase::Day && NewRound > 1)
     {
-        UE_LOG(LogTemp, Log, TEXT("[GameMode] Round %d ½ÃÀÛ. ÀÎº¥Åä¸® ¸¸·á Ã³¸® Áß..."), NewRound);
+        UE_LOG(LogTemp, Log, TEXT("[GameMode] Round %d Start... Inventory Cleaning..."), NewRound);
 
-        // ¸ğµç Ä³¸¯ÅÍ Ã£±â
+        // ëª¨ë“  ìºë¦­í„° ì°¾ê¸°
         TArray<AActor*> AllCharacters;
         UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACharacter::StaticClass(), AllCharacters);
 
-        // °¢ Ä³¸¯ÅÍÀÇ InventoryComponent¿¡ ¸¸·á Ã³¸® È£Ãâ
+        // ê° ìºë¦­í„°ì˜ InventoryComponentì— ë§Œë£Œ ì²˜ë¦¬ í˜¸ì¶œ
         for (AActor* Actor : AllCharacters)
         {
             if (UInventoryComponent* InvComp = Actor->FindComponentByClass<UInventoryComponent>())
@@ -133,4 +137,132 @@ void ATreasureHuntGameMode::OnPhaseChangedHandler(EGamePhase NewPhase, int32 New
             }
         }
     }
+    // ì²«ë‚ ë°¤ ë¹„ë°€ë²ˆí˜¸ ë°°ì¹˜
+    if (NewPhase == EGamePhase::Night && NewRound == 1)
+    {
+        UE_LOG(LogTemp, Log, TEXT("[GameMode] First Night... Password Patching...."));
+        AssignPassword();
+    }
+}
+
+
+void ATreasureHuntGameMode::SpawnStatues()
+{
+    if (!HasAuthority())
+    {
+        return;
+    }
+
+    if (StatueClass == nullptr)
+    {
+        UE_LOG(LogTemp, Error, TEXT("[GameMode] StatueClass is not selected"));
+        return;
+    }
+
+    // 1. ë ˆë²¨ì˜ ëª¨ë“  ìŠ¤í° í›„ë³´ ìˆ˜ì§‘
+    TArray<AActor*> FoundPoints;
+    UGameplayStatics::GetAllActorsOfClass(
+        GetWorld(), AStatueSpawnPoint::StaticClass(), FoundPoints);
+
+    if (FoundPoints.Num() == 0)
+    {
+        UE_LOG(LogTemp, Error, TEXT("[GameMode] StatueSpawnPoint is Not in Level"));
+        return;
+    }
+
+    // 2. ì…”í”Œ (Fisher-Yates)
+    for (int32 i = FoundPoints.Num() - 1; i > 0; --i)
+    {
+        const int32 j = FMath::RandRange(0, i);
+        FoundPoints.Swap(i, j);
+    }
+
+    // 3. ì•ì—ì„œë¶€í„° StatueSpawnCountê°œë§Œ ìŠ¤í°
+    const int32 SpawnNum = FMath::Min(StatueSpawnCount, FoundPoints.Num());
+    for (int32 i = 0; i < SpawnNum; ++i)
+    {
+        AStatueSpawnPoint* Point = Cast<AStatueSpawnPoint>(FoundPoints[i]);
+        if (Point == nullptr)
+        {
+            continue;
+        }
+
+        FActorSpawnParameters Params;
+        Params.SpawnCollisionHandlingOverride =
+            ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+        AStatueActor* NewStatue = GetWorld()->SpawnActor<AStatueActor>(
+            StatueClass,
+            Point->GetActorLocation(),
+            Point->GetActorRotation(),
+            Params);
+
+        if (NewStatue != nullptr)
+        {
+            NewStatue->RegionID = Point->RegionID;
+            SpawnedStatues.Add(NewStatue);
+        }
+    }
+
+    UE_LOG(LogTemp, Log, TEXT("[GameMode] Spawned % d statues"), SpawnedStatues.Num());
+}
+
+void ATreasureHuntGameMode::AssignPassword()
+{
+    if (!HasAuthority())
+    {
+        return;
+    }
+
+    // 1. ì „ì²´ ì´ˆê¸°í™”
+    for (int32 i = 0; i < SpawnedStatues.Num(); ++i)
+    {
+        if (SpawnedStatues[i] != nullptr)
+        {
+            SpawnedStatues[i]->ClearNumber();
+        }
+    }
+
+    // 2. ì„ìƒ ì¸ë±ìŠ¤ ì…”í”Œ
+    TArray<int32> Indices;
+    for (int32 i = 0; i < SpawnedStatues.Num(); ++i)
+    {
+        Indices.Add(i);
+    }
+    for (int32 i = Indices.Num() - 1; i > 0; --i)
+    {
+        const int32 j = FMath::RandRange(0, i);
+        Indices.Swap(i, j);
+    }
+
+    // 3. ì¤‘ë³µ ì—†ëŠ” ìˆ«ì 3ê°œ (0~9 ì…”í”Œ í›„ ì• 3ê°œ)
+    TArray<int32> Digits;
+    for (int32 d = 0; d <= 9; ++d)
+    {
+        Digits.Add(d);
+    }
+    for (int32 i = Digits.Num() - 1; i > 0; --i)
+    {
+        const int32 j = FMath::RandRange(0, i);
+        Digits.Swap(i, j);
+    }
+
+    // 4. í• ë‹¹
+    CurrentPassword.Empty();
+    const int32 AssignNum = FMath::Min(3, Indices.Num());
+    for (int32 k = 0; k < AssignNum; ++k)
+    {
+        AStatueActor* Target = SpawnedStatues[Indices[k]];
+        if (Target != nullptr)
+        {
+            Target->InitStatue(Digits[k], k);
+            CurrentPassword.Add(Digits[k]);
+        }
+    }
+
+    // ì„œë²„ ë¡œê·¸ë¡œ í™•ì¸ (í…ŒìŠ¤íŠ¸ìš© - ë‚˜ì¤‘ì— ì œê±°)
+    UE_LOG(LogTemp, Warning, TEXT("[GameMode] PassWord fetching: %d-%d-%d"),
+        CurrentPassword.IsValidIndex(0) ? CurrentPassword[0] : -1,
+        CurrentPassword.IsValidIndex(1) ? CurrentPassword[1] : -1,
+        CurrentPassword.IsValidIndex(2) ? CurrentPassword[2] : -1);
 }

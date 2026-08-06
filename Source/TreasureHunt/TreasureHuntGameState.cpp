@@ -51,7 +51,7 @@ void ATreasureHuntGameState::Server_StartPhase(EGamePhase NewPhase, int32 NewRou
 
 void ATreasureHuntGameState::OnRep_Phase()
 {
-    UE_LOG(LogTemp, Log, TEXT("[Phase] %s Ω√¿€ (Round %d, %.0f√ )"),
+    UE_LOG(LogTemp, Log, TEXT("[Phase] %s Start (Round %d, %.0fs)"),
         CurrentPhase == EGamePhase::Day ? TEXT("Day") : TEXT("Night"),
         CurrentRound,
         PhaseTimeRemaining);
